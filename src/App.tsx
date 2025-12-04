@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 export function App() {
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <Button>Hello World!</Button>
     </div>
   );

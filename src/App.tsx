@@ -1,5 +1,11 @@
+import { Toaster } from 'sonner';
 import { Router } from './Router';
 
 export function App() {
-  return <Router />;
+  return (
+    <>
+      <Toaster richColors />
+      <Router />
+    </>
+  );
 }

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -43,6 +43,10 @@ function SignInPage() {
   return (
     <>
       <title>{pageTitleTemplate('Login')}</title>
+
+      <Button asChild className="absolute top-8 right-8" variant={'link'}>
+        <Link to="/sign-up">Novo estabelecimento</Link>
+      </Button>
 
       <div className="p-8">
         <div className="flex w-[360px] flex-col justify-center gap-6">

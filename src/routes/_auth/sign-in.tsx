@@ -1,8 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { signIn } from '@/api/sign-in';
 import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -27,8 +30,12 @@ function SignInPage() {
     resolver: zodResolver(signInFormSchema),
   });
 
+  const { mutateAsync: authenticate } = useMutation({
+    mutationFn: signIn,
+  });
+
   async function handleSignIn(data: SignInFormData) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await authenticate({ email: data.email });
 
     toast.success('Enviamos um link de autenticação para seu e-mail.', {
       action: {
@@ -36,8 +43,6 @@ function SignInPage() {
         onClick: () => handleSignIn(data),
       },
     });
-
-    console.log({ data });
   }
 
   return (
@@ -65,6 +70,7 @@ function SignInPage() {
               <Field>
                 <FieldLabel htmlFor="email">Seu e-mail</FieldLabel>
                 <Input
+                  disabled={isSubmitting}
                   id="email"
                   placeholder="seu@email.com"
                   required
@@ -79,6 +85,9 @@ function SignInPage() {
                   disabled={isSubmitting}
                   type="submit"
                 >
+                  {isSubmitting && (
+                    <Loader2Icon className="size-5 animate-spin" />
+                  )}
                   Acessar painel
                 </Button>
               </Field>

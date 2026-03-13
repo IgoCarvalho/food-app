@@ -1,14 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { registerRestaurant } from '@/api/register-restaurant';
 import { Button } from '@/components/ui/button';
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  FieldSet,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { pageTitleTemplate } from '@/lib/page-title-template';
@@ -37,9 +41,18 @@ function SignUpPage() {
 
   const navigate = Route.useNavigate();
 
+  const { mutateAsync: registerRestaurantFn } = useMutation({
+    mutationFn: registerRestaurant,
+  });
+
   async function handleSignUp(data: SignUpFormData) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await registerRestaurantFn({
+        restaurantName: data.restaurantName,
+        managerName: data.managerName,
+        phone: data.phone,
+        email: data.email,
+      });
 
       toast.success('Restaurante cadastrado com sucesso!', {
         action: {
@@ -47,8 +60,6 @@ function SignUpPage() {
           onClick: () => navigate({ to: '/sign-in' }),
         },
       });
-
-      console.log({ data });
     } catch (error) {
       console.error(error);
 
@@ -78,7 +89,7 @@ function SignUpPage() {
 
           <form className="" onSubmit={handleSubmit(handleSignUp)}>
             <FieldGroup>
-              <FieldGroup>
+              <FieldSet className="gap-4" disabled={isSubmitting}>
                 <Field>
                   <FieldLabel htmlFor="restaurantName">
                     Nome do estabelecimento
@@ -117,7 +128,7 @@ function SignUpPage() {
                     {...register('phone')}
                   />
                 </Field>
-              </FieldGroup>
+              </FieldSet>
 
               <Field className="gap-4">
                 <Button
@@ -125,6 +136,9 @@ function SignUpPage() {
                   disabled={isSubmitting}
                   type="submit"
                 >
+                  {isSubmitting && (
+                    <Loader2Icon className="size-5 animate-spin" />
+                  )}
                   Finalizar cadastro
                 </Button>
 

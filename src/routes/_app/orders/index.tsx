@@ -1,4 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { listOrdersQuery } from '@/api/list-orders';
 import { Pagination } from '@/components/pagination';
 import {
   Table,
@@ -16,6 +18,8 @@ export const Route = createFileRoute('/_app/orders/')({
 });
 
 function RouteComponent() {
+  const { data: orders } = useQuery(listOrdersQuery());
+
   return (
     <>
       <title>{pageTitleTemplate('Pedidos')}</title>
@@ -42,8 +46,8 @@ function RouteComponent() {
               </TableHeader>
 
               <TableBody>
-                {Array.from({ length: 10 }).map((_, index) => (
-                  <OrderTableRow key={index} />
+                {orders?.data.map((order) => (
+                  <OrderTableRow key={order.orderId} order={order} />
                 ))}
               </TableBody>
             </Table>

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import z from 'zod';
 import { listOrdersQuery } from '@/api/list-orders';
 import { Pagination } from '@/components/pagination';
 import {
@@ -13,12 +14,25 @@ import { pageTitleTemplate } from '@/lib/page-title-template';
 import { OrderTableFilters } from './-components/order-table-filters';
 import { OrderTableRow } from './-components/order-table-row';
 
+const searchSchema = z.object({
+  page: z.number().min(1).catch(1),
+});
+
 export const Route = createFileRoute('/_app/orders/')({
   component: RouteComponent,
+  validateSearch: (search) => searchSchema.parse(search),
 });
 
 function RouteComponent() {
-  const { data: orders } = useQuery(listOrdersQuery());
+  const { page } = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const { data: orders } = useQuery(listOrdersQuery({ page }));
+
+  function handlePageChange(newPage: number) {
+    const search = searchSchema.parse({ newPage });
+    navigate({ search });
+  }
 
   return (
     <>
@@ -53,7 +67,14 @@ function RouteComponent() {
             </Table>
           </div>
 
-          <Pagination pageIndex={0} perPage={10} totalCount={105} />
+          {!!orders && (
+            <Pagination
+              onPageChange={handlePageChange}
+              page={page}
+              perPage={orders.meta.perPage}
+              totalCount={orders.meta.totalCount}
+            />
+          )}
         </div>
       </div>
     </>

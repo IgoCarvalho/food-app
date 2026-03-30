@@ -41,7 +41,7 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
       </TableCell>
       <TableCell className="font-medium">{order.customerName}</TableCell>
       <TableCell className="font-medium">
-        {formatCurrencyToBrl(order.total)}
+        {formatCurrencyToBrl(order.total / 100)}
       </TableCell>
       <TableCell>
         <Button size="sm" variant="outline">

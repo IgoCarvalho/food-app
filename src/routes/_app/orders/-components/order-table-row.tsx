@@ -1,4 +1,5 @@
 import { ArrowRightIcon, SearchIcon, XIcon } from 'lucide-react';
+import { useState } from 'react';
 import type { Order } from '@/api/list-orders';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -13,10 +14,12 @@ interface OrderTableRowProps {
 }
 
 export function OrderTableRow({ order }: OrderTableRowProps) {
+  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+
   return (
     <TableRow>
       <TableCell>
-        <Dialog>
+        <Dialog onOpenChange={setIsOrderDetailsOpen} open={isOrderDetailsOpen}>
           <DialogTrigger asChild>
             <Button size="icon-sm" variant="outline">
               <SearchIcon className="size-3" />
@@ -24,7 +27,7 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
             </Button>
           </DialogTrigger>
 
-          <OrderDetails />
+          <OrderDetails isOpen={isOrderDetailsOpen} orderId={order.orderId} />
         </Dialog>
       </TableCell>
       <TableCell

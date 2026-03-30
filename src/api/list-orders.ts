@@ -18,21 +18,34 @@ export interface Order {
 
 interface ListOrdersInput {
   page?: number;
+  status?: string;
+  orderId?: string;
+  customerName?: string;
 }
 
 interface ListOrdersResponse extends PaginatedResponse<Order> {}
 
-export async function listOrders({ page }: ListOrdersInput) {
+export async function listOrders({
+  page,
+  status,
+  orderId,
+  customerName,
+}: ListOrdersInput) {
   const response = await api.get<ListOrdersResponse>('/orders', {
-    params: { page },
+    params: { page, status, orderId, customerName },
   });
 
   return response.data;
 }
 
-export function listOrdersQuery({ page }: ListOrdersInput = {}) {
+export function listOrdersQuery({
+  page,
+  status,
+  orderId,
+  customerName,
+}: ListOrdersInput = {}) {
   return queryOptions({
-    queryKey: ['orders', page],
-    queryFn: () => listOrders({ page }),
+    queryKey: ['orders', page, status, orderId, customerName],
+    queryFn: () => listOrders({ page, status, orderId, customerName }),
   });
 }

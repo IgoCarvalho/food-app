@@ -16,6 +16,9 @@ import { OrderTableRow } from './-components/order-table-row';
 
 const searchSchema = z.object({
   page: z.number().min(1).catch(1),
+  status: z.string().optional(),
+  orderId: z.string().optional(),
+  customerName: z.string().optional(),
 });
 
 export const Route = createFileRoute('/_app/orders/')({
@@ -24,14 +27,21 @@ export const Route = createFileRoute('/_app/orders/')({
 });
 
 function RouteComponent() {
-  const { page } = Route.useSearch();
+  const { page, status, orderId, customerName } = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: orders } = useQuery(listOrdersQuery({ page }));
+  const { data: orders } = useQuery(
+    listOrdersQuery({
+      page,
+      orderId,
+      customerName,
+      status: status === 'all' ? undefined : status,
+    })
+  );
 
   function handlePageChange(newPage: number) {
-    const search = searchSchema.parse({ newPage });
-    navigate({ search });
+    const search = searchSchema.parse({ page: newPage });
+    navigate({ search: (prev) => ({ ...prev, page: search.page }) });
   }
 
   return (

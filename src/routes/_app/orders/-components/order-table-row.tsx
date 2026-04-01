@@ -1,6 +1,12 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowRightIcon, SearchIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
-import type { Order } from '@/api/list-orders';
+import { cancelOrder } from '@/api/cancel-order';
+import type {
+  ListOrdersResponse,
+  Order,
+  OrderStatus as OrderStatusType,
+} from '@/api/list-orders';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -13,8 +19,56 @@ interface OrderTableRowProps {
   order: Order;
 }
 
+const orderStatusesThatCanBeCanceled = new Set<OrderStatusType>([
+  'pending',
+  'processing',
+]);
+
 export function OrderTableRow({ order }: OrderTableRowProps) {
+  const queryClient = useQueryClient();
+
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+
+  const { mutateAsync: handleCancelOrder } = useMutation({
+    mutationFn: cancelOrder,
+    onSuccess: (_, { orderId }) => {
+      const cachedOrders = queryClient.getQueriesData<ListOrdersResponse>({
+        queryKey: ['orders'],
+      });
+
+      for (const [cacheKey, cachedData] of cachedOrders) {
+        if (!cachedData) {
+          continue;
+        }
+
+        queryClient.setQueryData<ListOrdersResponse>(cacheKey, {
+          ...cachedData,
+          data: cachedData.data.map((cachedOrder) => {
+            if (cachedOrder.orderId === orderId) {
+              return {
+                ...cachedOrder,
+                status: 'canceled',
+              };
+            }
+
+            return cachedOrder;
+          }),
+        });
+      }
+
+      const cachedOrderDetails = queryClient.getQueryData<Order>([
+        'order',
+        orderId,
+      ]);
+
+      if (cachedOrderDetails) {
+        queryClient.setQueryData<Order>(['order', orderId], {
+          ...cachedOrderDetails,
+          status: 'canceled',
+        });
+      }
+    },
+  });
 
   return (
     <TableRow>
@@ -53,7 +107,12 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
         </Button>
       </TableCell>
       <TableCell>
-        <Button size="sm" variant="ghost">
+        <Button
+          disabled={!orderStatusesThatCanBeCanceled.has(order.status)}
+          onClick={() => handleCancelOrder({ orderId: order.orderId })}
+          size="sm"
+          variant="ghost"
+        >
           <XIcon className="size-3" />
           Cancelar
         </Button>

@@ -23,7 +23,7 @@ interface ListOrdersInput {
   customerName?: string;
 }
 
-interface ListOrdersResponse extends PaginatedResponse<Order> {}
+export interface ListOrdersResponse extends PaginatedResponse<Order> {}
 
 export async function listOrders({
   page,

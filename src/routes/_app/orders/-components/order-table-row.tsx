@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowRightIcon, SearchIcon, XIcon } from 'lucide-react';
+import { ArrowRightIcon, Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
+import { approveOrder } from '@/api/approve-order';
 import { cancelOrder } from '@/api/cancel-order';
+import { deliverOrder } from '@/api/deliver-order';
+import { dispatchOrder } from '@/api/dispatch-order';
 import type {
   ListOrdersResponse,
   Order,
@@ -29,46 +32,78 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
 
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
 
-  const { mutateAsync: handleCancelOrder } = useMutation({
-    mutationFn: cancelOrder,
-    onSuccess: (_, { orderId }) => {
-      const cachedOrders = queryClient.getQueriesData<ListOrdersResponse>({
-        queryKey: ['orders'],
+  function updateOrderStatusOnCache(
+    orderId: string,
+    orderStatus: OrderStatusType
+  ) {
+    const cachedOrders = queryClient.getQueriesData<ListOrdersResponse>({
+      queryKey: ['orders'],
+    });
+
+    for (const [cacheKey, cachedData] of cachedOrders) {
+      if (!cachedData) {
+        continue;
+      }
+
+      queryClient.setQueryData<ListOrdersResponse>(cacheKey, {
+        ...cachedData,
+        data: cachedData.data.map((cachedOrder) => {
+          if (cachedOrder.orderId === orderId) {
+            return {
+              ...cachedOrder,
+              status: orderStatus,
+            };
+          }
+
+          return cachedOrder;
+        }),
       });
+    }
 
-      for (const [cacheKey, cachedData] of cachedOrders) {
-        if (!cachedData) {
-          continue;
-        }
+    const cachedOrderDetails = queryClient.getQueryData<Order>([
+      'order',
+      orderId,
+    ]);
 
-        queryClient.setQueryData<ListOrdersResponse>(cacheKey, {
-          ...cachedData,
-          data: cachedData.data.map((cachedOrder) => {
-            if (cachedOrder.orderId === orderId) {
-              return {
-                ...cachedOrder,
-                status: 'canceled',
-              };
-            }
+    if (cachedOrderDetails) {
+      queryClient.setQueryData<Order>(['order', orderId], {
+        ...cachedOrderDetails,
+        status: orderStatus,
+      });
+    }
+  }
 
-            return cachedOrder;
-          }),
-        });
-      }
+  const { mutateAsync: handleCancelOrder, isPending: isCancellingOrder } =
+    useMutation({
+      mutationFn: cancelOrder,
+      onSuccess: (_, { orderId }) => {
+        updateOrderStatusOnCache(orderId, 'canceled');
+      },
+    });
 
-      const cachedOrderDetails = queryClient.getQueryData<Order>([
-        'order',
-        orderId,
-      ]);
+  const { mutateAsync: handleApproveOrder, isPending: isApprovingOrder } =
+    useMutation({
+      mutationFn: approveOrder,
+      onSuccess: (_, { orderId }) => {
+        updateOrderStatusOnCache(orderId, 'processing');
+      },
+    });
 
-      if (cachedOrderDetails) {
-        queryClient.setQueryData<Order>(['order', orderId], {
-          ...cachedOrderDetails,
-          status: 'canceled',
-        });
-      }
-    },
-  });
+  const { mutateAsync: handleDispatchOrder, isPending: isDispatchingOrder } =
+    useMutation({
+      mutationFn: dispatchOrder,
+      onSuccess: (_, { orderId }) => {
+        updateOrderStatusOnCache(orderId, 'delivering');
+      },
+    });
+
+  const { mutateAsync: handleDeliverOrder, isPending: isDeliveringOrder } =
+    useMutation({
+      mutationFn: deliverOrder,
+      onSuccess: (_, { orderId }) => {
+        updateOrderStatusOnCache(orderId, 'delivered');
+      },
+    });
 
   return (
     <TableRow>
@@ -101,19 +136,67 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
         {formatCurrencyToBrl(order.total / 100)}
       </TableCell>
       <TableCell>
-        <Button size="sm" variant="outline">
-          <ArrowRightIcon className="size-3" />
-          Aprovar
-        </Button>
+        {order.status === 'pending' && (
+          <Button
+            disabled={isApprovingOrder}
+            onClick={() => handleApproveOrder({ orderId: order.orderId })}
+            size="sm"
+            variant="outline"
+          >
+            {isApprovingOrder ? (
+              <Loader2Icon className="size-3 animate-spin" />
+            ) : (
+              <ArrowRightIcon className="size-3" />
+            )}
+            Aprovar
+          </Button>
+        )}
+        {order.status === 'processing' && (
+          <Button
+            disabled={isDispatchingOrder}
+            onClick={() => handleDispatchOrder({ orderId: order.orderId })}
+            size="sm"
+            variant="outline"
+          >
+            {isDispatchingOrder ? (
+              <Loader2Icon className="size-3 animate-spin" />
+            ) : (
+              <ArrowRightIcon className="size-3" />
+            )}
+            Em entrega
+          </Button>
+        )}
+        {order.status === 'delivering' && (
+          <Button
+            disabled={isDeliveringOrder}
+            onClick={() => handleDeliverOrder({ orderId: order.orderId })}
+            size="sm"
+            variant="outline"
+          >
+            {isDeliveringOrder ? (
+              <Loader2Icon className="size-3 animate-spin" />
+            ) : (
+              <ArrowRightIcon className="size-3" />
+            )}
+            Entregue
+          </Button>
+        )}
       </TableCell>
       <TableCell>
         <Button
-          disabled={!orderStatusesThatCanBeCanceled.has(order.status)}
+          disabled={
+            !orderStatusesThatCanBeCanceled.has(order.status) ||
+            isCancellingOrder
+          }
           onClick={() => handleCancelOrder({ orderId: order.orderId })}
           size="sm"
           variant="ghost"
         >
-          <XIcon className="size-3" />
+          {isCancellingOrder ? (
+            <Loader2Icon className="size-3 animate-spin" />
+          ) : (
+            <XIcon className="size-3" />
+          )}
           Cancelar
         </Button>
       </TableCell>

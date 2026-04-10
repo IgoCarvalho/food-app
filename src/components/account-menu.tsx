@@ -1,4 +1,9 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { BuildingIcon, ChevronDown, LogOutIcon } from 'lucide-react';
 import { getManagedRestaurantQuery } from '@/api/get-managed-restaurant';
@@ -19,17 +24,19 @@ import { Skeleton } from './ui/skeleton';
 
 export function AccountMenu() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const { data: profile, isLoading: isProfileLoading } = useQuery(
-    getProfileQuery()
-  );
+  const { data: profile } = useSuspenseQuery(getProfileQuery());
   const { data: managedRestaurant, isLoading: isManagedRestaurantLoading } =
     useQuery(getManagedRestaurantQuery());
 
   const { isPending: isSigningOut, mutateAsync: handleSignOut } = useMutation({
     mutationFn: signOut,
     onSuccess: () => {
-      navigate({ to: '/sign-in', replace: true });
+      queryClient.removeQueries({
+        queryKey: getProfileQuery().queryKey,
+      });
+      navigate({ to: '/sign-in' });
     },
   });
 
@@ -52,19 +59,10 @@ export function AccountMenu() {
 
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="flex flex-col gap-1">
-            {isProfileLoading ? (
-              <>
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-24" />
-              </>
-            ) : (
-              <>
-                <span>{profile?.name}</span>
-                <span className="block font-normal text-muted-foreground text-xs">
-                  {profile?.email}
-                </span>
-              </>
-            )}
+            <span>{profile?.name}</span>
+            <span className="block font-normal text-muted-foreground text-xs">
+              {profile?.email}
+            </span>
           </DropdownMenuLabel>
 
           <DropdownMenuSeparator />
@@ -81,7 +79,12 @@ export function AccountMenu() {
             className="w-full text-rose-500 dark:text-rose-400"
             disabled={isSigningOut}
           >
-            <button onClick={() => handleSignOut()} type="button">
+            <button
+              onClick={() => {
+                handleSignOut();
+              }}
+              type="button"
+            >
               <LogOutIcon className="size-4 text-current" />
               <span>Sair</span>
             </button>

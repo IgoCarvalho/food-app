@@ -5,6 +5,7 @@ import { approveOrder } from '@/api/approve-order';
 import { cancelOrder } from '@/api/cancel-order';
 import { deliverOrder } from '@/api/deliver-order';
 import { dispatchOrder } from '@/api/dispatch-order';
+import type { GetOrderDetailsResponse } from '@/api/get-order-details';
 import type {
   ListOrdersResponse,
   Order,
@@ -60,16 +61,25 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
       });
     }
 
-    const cachedOrderDetails = queryClient.getQueryData<Order>([
-      'order',
-      orderId,
-    ]);
+    const cachedOrderDetails =
+      queryClient.getQueryData<GetOrderDetailsResponse>(['order', orderId]);
 
-    if (cachedOrderDetails) {
-      queryClient.setQueryData<Order>(['order', orderId], {
-        ...cachedOrderDetails,
-        status: orderStatus,
-      });
+    if (cachedOrderDetails?.order) {
+      queryClient.setQueryData<GetOrderDetailsResponse>(
+        ['order', orderId],
+        (oldData) => {
+          if (!oldData) {
+            return oldData;
+          }
+
+          return {
+            order: {
+              ...oldData.order,
+              status: orderStatus,
+            },
+          };
+        }
+      );
     }
   }
 
@@ -121,7 +131,7 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
       </TableCell>
       <TableCell
         className="w-[140px] max-w-[140px] overflow-hidden text-ellipsis text-nowrap font-medium font-mono text-xs"
-        title="3717cee7-a62b-46c6-8ebe-887f2f8f03f2"
+        title={order.orderId}
       >
         {order.orderId}
       </TableCell>

@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 
 interface GetManagedRestaurantResponse {
   name: string;
@@ -11,11 +11,11 @@ interface GetManagedRestaurantResponse {
 }
 
 export async function getManagedRestaurant() {
-  const response = await api.get<GetManagedRestaurantResponse>(
+  const response = await api.fetch<GetManagedRestaurantResponse>(
     '/managed-restaurant'
   );
 
-  return response.data;
+  return response;
 }
 
 export function getManagedRestaurantQuery() {

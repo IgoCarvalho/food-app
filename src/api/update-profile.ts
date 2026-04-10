@@ -1,4 +1,4 @@
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 
 interface UpdateProfileInput {
   name: string;
@@ -6,5 +6,8 @@ interface UpdateProfileInput {
 }
 
 export function updateProfile({ name, description }: UpdateProfileInput) {
-  return api.put('/profile', { name, description });
+  return api.fetch('/profile', {
+    method: 'PUT',
+    body: JSON.stringify({ name, description }),
+  });
 }

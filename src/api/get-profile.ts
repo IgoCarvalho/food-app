@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 
 interface GetProfileResponse {
   name: string;
@@ -11,15 +11,21 @@ interface GetProfileResponse {
   updatedAt: Date;
 }
 
-export async function getProfile() {
-  const response = await api.get<GetProfileResponse>('/me');
-
-  return response.data;
+interface GetProfileInput {
+  skipAuthRedirect?: boolean;
 }
 
-export function getProfileQuery() {
+export async function getProfile({ skipAuthRedirect }: GetProfileInput = {}) {
+  const response = await api.fetch<GetProfileResponse>('/me', {
+    skipAuthRedirect,
+  });
+
+  return response;
+}
+
+export function getProfileQuery({ skipAuthRedirect }: GetProfileInput = {}) {
   return queryOptions({
     queryKey: ['profile'],
-    queryFn: getProfile,
+    queryFn: () => getProfile({ skipAuthRedirect }),
   });
 }

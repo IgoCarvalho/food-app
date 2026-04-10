@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { api, type PaginatedResponse } from '@/lib/axios';
+import { api, type PaginatedResponse } from '@/lib/api';
 
 export type OrderStatus =
   | 'pending'
@@ -31,11 +31,11 @@ export async function listOrders({
   orderId,
   customerName,
 }: ListOrdersInput) {
-  const response = await api.get<ListOrdersResponse>('/orders', {
+  const response = await api.fetch<ListOrdersResponse>('/orders', {
     params: { page, status, orderId, customerName },
   });
 
-  return response.data;
+  return response;
 }
 
 export function listOrdersQuery({

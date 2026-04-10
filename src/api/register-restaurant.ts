@@ -1,4 +1,4 @@
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 
 interface RegisterRestaurantInput {
   restaurantName: string;
@@ -13,10 +13,8 @@ export function registerRestaurant({
   phone,
   email,
 }: RegisterRestaurantInput) {
-  return api.post('/restaurants', {
-    restaurantName,
-    managerName,
-    phone,
-    email,
+  return api.fetch('/restaurants', {
+    method: 'POST',
+    body: JSON.stringify({ restaurantName, managerName, phone, email }),
   });
 }

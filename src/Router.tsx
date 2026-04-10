@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { queryClient } from '@/lib/react-query';
+import { api } from './lib/api';
 import { routeTree } from './routeTree.gen';
 
 const router = createRouter({
@@ -10,6 +11,16 @@ const router = createRouter({
   },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
+});
+
+api.onError((error, options) => {
+  if (options?.skipAuthRedirect) {
+    return;
+  }
+
+  if (error.status === 401) {
+    router.invalidate();
+  }
 });
 
 declare module '@tanstack/react-router' {

@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  isRedirect,
+  Outlet,
+  redirect,
+} from '@tanstack/react-router';
 import { PizzaIcon } from 'lucide-react';
 import { getProfileQuery } from '@/api/get-profile';
 
@@ -6,8 +11,10 @@ export const Route = createFileRoute('/_auth')({
   component: AuthLayout,
   beforeLoad: async ({ context: { queryClient } }) => {
     try {
-      const user = await queryClient.ensureQueryData({
-        ...getProfileQuery(),
+      const user = await queryClient.fetchQuery({
+        ...getProfileQuery({
+          skipAuthRedirect: true,
+        }),
         retry: false,
       });
 
@@ -17,7 +24,9 @@ export const Route = createFileRoute('/_auth')({
         });
       }
     } catch (error) {
-      console.log({ error });
+      if (isRedirect(error)) {
+        throw error;
+      }
     }
   },
 });

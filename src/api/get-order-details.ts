@@ -1,12 +1,12 @@
 import { queryOptions } from '@tanstack/react-query';
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 import type { OrderStatus } from './list-orders';
 
 interface GetOrderDetailsInput {
   orderId: string;
 }
 
-interface GetOrderDetailsResponse {
+export interface GetOrderDetailsResponse {
   order: {
     status: OrderStatus;
     id: string;
@@ -29,9 +29,11 @@ interface GetOrderDetailsResponse {
 }
 
 export async function getOrderDetails({ orderId }: GetOrderDetailsInput) {
-  const response = await api.get<GetOrderDetailsResponse>(`/orders/${orderId}`);
+  const response = await api.fetch<GetOrderDetailsResponse>(
+    `/orders/${orderId}`
+  );
 
-  return response.data;
+  return response;
 }
 
 export function getOrderDetailsQuery({ orderId }: GetOrderDetailsInput) {

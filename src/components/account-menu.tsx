@@ -4,7 +4,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { BuildingIcon, ChevronDown, LogOutIcon } from 'lucide-react';
 import { getManagedRestaurantQuery } from '@/api/get-managed-restaurant';
 import { getProfileQuery } from '@/api/get-profile';
@@ -23,8 +23,8 @@ import {
 import { Skeleton } from './ui/skeleton';
 
 export function AccountMenu() {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: profile } = useSuspenseQuery(getProfileQuery());
   const { data: managedRestaurant, isLoading: isManagedRestaurantLoading } =
@@ -33,10 +33,10 @@ export function AccountMenu() {
   const { isPending: isSigningOut, mutateAsync: handleSignOut } = useMutation({
     mutationFn: signOut,
     onSuccess: () => {
-      queryClient.removeQueries({
-        queryKey: getProfileQuery().queryKey,
-      });
-      navigate({ to: '/sign-in' });
+      setTimeout(() => {
+        queryClient.clear();
+        router.invalidate();
+      }, 100);
     },
   });
 

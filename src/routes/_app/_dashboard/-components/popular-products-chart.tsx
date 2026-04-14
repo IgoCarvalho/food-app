@@ -1,5 +1,8 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { BarChartIcon } from 'lucide-react';
+import { useMemo } from 'react';
 import { Pie, PieChart } from 'recharts';
+import { getPopularProductsQuery } from '@/api/get-popular-products';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   type ChartConfig,
@@ -8,38 +11,50 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 
-const data = [
-  { product: 'Peperoni', amount: 38, fill: 'var(--color-sky-400)' },
-  { product: 'Calabresa', amount: 16, fill: 'var(--color-amber-400)' },
-  { product: 'Mussarela', amount: 24, fill: 'var(--color-emerald-400)' },
-  { product: 'Frango', amount: 18, fill: 'var(--color-violet-400)' },
-  { product: 'Bacon', amount: 9, fill: 'var(--color-rose-400)' },
-];
+const availableColors = [
+  'var(--color-sky-400)',
+  'var(--color-amber-400)',
+  'var(--color-emerald-400)',
+  'var(--color-violet-400)',
+  'var(--color-rose-400)',
+] as const;
 
-const chartConfig = {
-  Peperoni: {
-    label: 'Peperoni',
-    color: 'var(--color-sky-400)',
-  },
-  Calabresa: {
-    label: 'Calabresa',
-    color: 'var(--color-amber-400)',
-  },
-  Mussarela: {
-    label: 'Mussarela',
-    color: 'var(--color-emerald-400)',
-  },
-  Frango: {
-    label: 'Frango',
-    color: 'var(--color-violet-400)',
-  },
-  Bacon: {
-    label: 'Bacon',
-    color: 'var(--color-rose-400)',
-  },
-} satisfies ChartConfig;
+interface ChartData {
+  product: string;
+  amount: number;
+  fill: string;
+}
 
 export function PopularProductsChart() {
+  const {
+    data: { popularProducts },
+  } = useSuspenseQuery(getPopularProductsQuery());
+
+  const { _chartData: chartData, _chartConfig: chartConfig } = useMemo(() => {
+    const _chartData: ChartData[] = [];
+
+    const _chartConfig: ChartConfig = {};
+
+    for (const [index, product] of popularProducts.entries()) {
+      if (!product.product) {
+        continue;
+      }
+
+      _chartData.push({
+        product: product.product,
+        amount: product.amount,
+        fill: availableColors[index % availableColors.length],
+      });
+
+      _chartConfig[product.product] = {
+        label: product.product,
+        color: availableColors[index % availableColors.length],
+      };
+    }
+
+    return { _chartData, _chartConfig };
+  }, [popularProducts]);
+
   return (
     <Card className="col-span-3">
       <CardHeader className="flex items-center justify-between">
@@ -60,10 +75,10 @@ export function PopularProductsChart() {
             <Pie
               cx={'50%'}
               cy={'50%'}
-              data={data}
+              data={chartData}
               dataKey="amount"
               innerRadius={64}
-              label={(pieData) => `${pieData.product} (${pieData.amount})`}
+              label={(pieData) => `${pieData.product} - (${pieData.amount})`}
               labelLine={false}
               nameKey="product"
               outerRadius={86}

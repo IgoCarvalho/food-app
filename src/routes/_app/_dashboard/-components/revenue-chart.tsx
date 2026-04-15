@@ -1,4 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import { useMemo, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+import { getDailyRevenueInPeriodQuery } from '@/api/get-daily-revenue-in-period';
 import {
   Card,
   CardContent,
@@ -7,27 +12,32 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
-
-const data = [
-  { date: '10/12', revenue: 1240 },
-  { date: '11/12', revenue: 1280 },
-  { date: '12/12', revenue: 1320 },
-  { date: '13/12', revenue: 1160 },
-  { date: '14/12', revenue: 930 },
-  { date: '15/12', revenue: 1440 },
-  { date: '16/12', revenue: 1280 },
-  { date: '17/12', revenue: 1120 },
-  { date: '18/12', revenue: 1560 },
-  { date: '19/12', revenue: 1600 },
-];
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { formatCurrencyToBrl } from '@/lib/format-currency';
 
 export function RevenueChart() {
-  function formatToCurrency(value: number) {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  }
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => ({
+    from: dayjs(new Date()).subtract(7, 'day').toDate(),
+    to: new Date(),
+  }));
+
+  const { data } = useQuery(
+    getDailyRevenueInPeriodQuery({
+      from: dateRange?.from,
+      to: dateRange?.to,
+    })
+  );
+
+  const revenuePerDay = useMemo(
+    () =>
+      data?.revenuePerDay
+        .map((item) => ({
+          date: dayjs(item.date).format('DD/MM'),
+          revenue: item.revenue / 100,
+        }))
+        .reverse(),
+    [data?.revenuePerDay]
+  );
 
   return (
     <Card className="col-span-6">
@@ -38,16 +48,20 @@ export function RevenueChart() {
           </CardTitle>
           <CardDescription>Receita diária no período</CardDescription>
         </div>
+
+        <div>
+          <DateRangePicker date={dateRange} onDateChange={setDateRange} />
+        </div>
       </CardHeader>
 
       <CardContent className="flex items-start">
         <ChartContainer className="h-[240px] w-full" config={{}}>
-          <LineChart data={data}>
+          <LineChart data={revenuePerDay}>
             <XAxis axisLine={false} dataKey="date" dy={16} tickLine={false} />
 
             <YAxis
               axisLine={false}
-              tickFormatter={formatToCurrency}
+              tickFormatter={formatCurrencyToBrl}
               tickLine={false}
               width={80}
             />

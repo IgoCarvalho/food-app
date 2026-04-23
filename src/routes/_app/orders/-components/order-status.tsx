@@ -25,7 +25,10 @@ export function OrderStatus({ status }: OrderStatusProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <div className={`size-2 rounded-full ${statusBulletColor}`} />
+      <div
+        className={`size-2 rounded-full ${statusBulletColor}`}
+        data-testid="order-status-badge"
+      />
       <span className="font-medium text-muted-foreground">
         {statusLabelMap[status]}
       </span>

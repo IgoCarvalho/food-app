@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-
+import dayjs from 'dayjs';
 import { api } from '@/lib/api';
 
 interface DailyRevenueInPeriod {
@@ -33,7 +33,14 @@ export function getDailyRevenueInPeriodQuery({
   to,
 }: GetDailyRevenueInPeriodInput) {
   return queryOptions({
-    queryKey: ['metrics', 'daily-revenue-in-period', { from, to }],
+    queryKey: [
+      'metrics',
+      'daily-revenue-in-period',
+      {
+        from: from && dayjs(from).format('YYYY-MM-DD'),
+        to: to && dayjs(to).format('YYYY-MM-DD'),
+      },
+    ],
     queryFn: () => getDailyRevenueInPeriod({ from, to }),
   });
 }

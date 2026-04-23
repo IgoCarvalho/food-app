@@ -9,6 +9,7 @@ import { Suspense, useEffect } from 'react';
 import { pageTitleTemplate } from '@/lib/page-title-template';
 import { CardErrorHandler } from './-components/card-error-handler';
 import { CardLoadingSkeleton } from './-components/card-loading-skeleton';
+import { ChartLoadingSkeleton } from './-components/chart-loading-skeleton';
 import { DashboardCardWrapper } from './-components/dashboard-card-wrapper';
 import { DayOrdersAmountCard } from './-components/day-orders-amount-card';
 import { MonthCanceledOrdersAmountCard } from './-components/month-canceled-orders-amount-card';
@@ -55,7 +56,13 @@ function IndexPage() {
 
         <div className="grid grid-cols-9 gap-4">
           <RevenueChart />
-          <PopularProductsChart />
+          <DashboardCardWrapper className="col-span-3">
+            <Suspense
+              fallback={<ChartLoadingSkeleton className="col-span-3" />}
+            >
+              <PopularProductsChart />
+            </Suspense>
+          </DashboardCardWrapper>
         </div>
       </div>
     </>

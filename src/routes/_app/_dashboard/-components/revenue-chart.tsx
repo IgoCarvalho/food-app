@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { Loader2Icon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
@@ -21,7 +22,7 @@ export function RevenueChart() {
     to: new Date(),
   }));
 
-  const { data } = useQuery(
+  const { data, isLoading } = useQuery(
     getDailyRevenueInPeriodQuery({
       from: dateRange?.from,
       to: dateRange?.to,
@@ -54,29 +55,33 @@ export function RevenueChart() {
         </div>
       </CardHeader>
 
-      <CardContent className="flex items-start">
-        <ChartContainer className="h-[240px] w-full" config={{}}>
-          <LineChart data={revenuePerDay}>
-            <XAxis axisLine={false} dataKey="date" dy={16} tickLine={false} />
+      <CardContent className="flex min-h-60 flex-1 items-center justify-center">
+        {isLoading ? (
+          <Loader2Icon className="size-10 animate-spin" />
+        ) : (
+          <ChartContainer className="h-[240px] w-full" config={{}}>
+            <LineChart data={revenuePerDay}>
+              <XAxis axisLine={false} dataKey="date" dy={16} tickLine={false} />
 
-            <YAxis
-              axisLine={false}
-              tickFormatter={formatCurrencyToBrl}
-              tickLine={false}
-              width={80}
-            />
+              <YAxis
+                axisLine={false}
+                tickFormatter={formatCurrencyToBrl}
+                tickLine={false}
+                width={80}
+              />
 
-            <CartesianGrid vertical={false} />
+              <CartesianGrid vertical={false} />
 
-            <Line
-              className="stroke-violet-500"
-              dataKey="revenue"
-              stroke="inherit"
-              strokeWidth={2}
-              type="linear"
-            />
-          </LineChart>
-        </ChartContainer>
+              <Line
+                className="stroke-violet-500"
+                dataKey="revenue"
+                stroke="inherit"
+                strokeWidth={2}
+                type="linear"
+              />
+            </LineChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

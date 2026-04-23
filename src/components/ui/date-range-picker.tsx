@@ -24,7 +24,7 @@ export function DateRangePicker({ date, onDateChange }: DatePickerProps) {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className="justify-start px-2.5 font-normal"
+            className="min-w-55 justify-start px-2.5 font-normal"
             id="date-picker-range"
             variant="outline"
           >

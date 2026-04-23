@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table';
 import { formatCurrencyToBrl } from '@/lib/format-currency';
 import { getTimeFromNow } from '@/lib/get-time-from-now';
+import { OrderDetailsSkeleton } from './order-details-skeleton';
 import { OrderStatus } from './order-status';
 
 interface OrderDetailsProps {
@@ -37,7 +38,7 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
         <DialogDescription>Detalhes do pedido</DialogDescription>
       </DialogHeader>
 
-      {!!orderDetails && (
+      {orderDetails ? (
         <div className="space-y-6">
           <Table>
             <TableBody>
@@ -120,6 +121,8 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
             </TableFooter>
           </Table>
         </div>
+      ) : (
+        <OrderDetailsSkeleton />
       )}
     </DialogContent>
   );

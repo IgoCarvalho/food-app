@@ -11,7 +11,7 @@ export function ChartLoadingSkeleton({
       className={cn('flex items-center justify-center', className)}
       {...props}
     >
-      <Loader2Icon className="size-10 animate-spin" />
+      <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
     </Card>
   );
 }

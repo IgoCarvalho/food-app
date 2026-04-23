@@ -57,7 +57,7 @@ export function RevenueChart() {
 
       <CardContent className="flex min-h-60 flex-1 items-center justify-center">
         {isLoading ? (
-          <Loader2Icon className="size-10 animate-spin" />
+          <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
         ) : (
           <ChartContainer className="h-[240px] w-full" config={{}}>
             <LineChart data={revenuePerDay}>

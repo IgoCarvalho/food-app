@@ -13,6 +13,7 @@ import {
 import { pageTitleTemplate } from '@/lib/page-title-template';
 import { OrderTableFilters } from './-components/order-table-filters';
 import { OrderTableRow } from './-components/order-table-row';
+import { OrderTableSkeleton } from './-components/order-table-skeleton';
 
 const searchSchema = z.object({
   page: z.number().min(1).catch(1),
@@ -30,7 +31,7 @@ function RouteComponent() {
   const { page, status, orderId, customerName } = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: orders } = useQuery(
+  const { data: orders, isLoading: isLoadingOrders } = useQuery(
     listOrdersQuery({
       page,
       orderId,
@@ -70,9 +71,13 @@ function RouteComponent() {
               </TableHeader>
 
               <TableBody>
-                {orders?.data.map((order) => (
-                  <OrderTableRow key={order.orderId} order={order} />
-                ))}
+                {isLoadingOrders ? (
+                  <OrderTableSkeleton />
+                ) : (
+                  orders?.data.map((order) => (
+                    <OrderTableRow key={order.orderId} order={order} />
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

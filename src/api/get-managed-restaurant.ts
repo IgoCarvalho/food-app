@@ -1,11 +1,11 @@
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
-interface GetManagedRestaurantResponse {
+export interface GetManagedRestaurantResponse {
   name: string;
   id: string;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
   managerId: string | null;
   description: string | null;
 }

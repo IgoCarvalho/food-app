@@ -1,14 +1,14 @@
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
-interface GetProfileResponse {
+export interface GetProfileResponse {
   name: string;
   email: string;
   id: string;
   phone: string | null;
   role: 'manager' | 'customer';
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 }
 
 interface GetProfileInput {

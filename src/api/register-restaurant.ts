@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 
-interface RegisterRestaurantInput {
+export interface RegisterRestaurantInput {
   restaurantName: string;
   managerName: string;
   phone: string;

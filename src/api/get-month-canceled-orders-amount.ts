@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
-interface GetMonthCanceledOrdersAmountResponse {
+export interface GetMonthCanceledOrdersAmountResponse {
   amount: number;
   diffFromLastMonth: number;
 }

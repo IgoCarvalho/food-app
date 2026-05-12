@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
-interface GetDayOrdersAmountResponse {
+export interface GetDayOrdersAmountResponse {
   amount: number;
   diffFromYesterday: number;
 }

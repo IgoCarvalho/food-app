@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { api } from '@/lib/api';
 
-interface DailyRevenueInPeriod {
+export interface DailyRevenueInPeriod {
   revenuePerDay: {
     date: string;
     revenue: number;

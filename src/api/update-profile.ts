@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 
-interface UpdateProfileInput {
+export interface UpdateProfileInput {
   name: string;
   description: string;
 }
